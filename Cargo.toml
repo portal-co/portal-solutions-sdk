@@ -1,0 +1,19 @@
+[package]
+name = "portal-solutions-sdk"
+version = "0.1.0"
+edition = "2024"
+license = "MPL-2.0"
+description = "SDK description system for portal solutions"
+
+[dependencies]
+hex = { version = "0.4.3", default-features = false, features = ["alloc"] }
+instability = "0.3.7"
+itertools = { version = "0.14.0", default-features = false, features = ["use_alloc"] }
+nom = { version = "8.0.0", default-features = false, features = ["alloc"] }
+pit-core = "^0.4.5"
+sha3 = { version = "0.10.8", default-features = false }
+spin = "0.10.0"
+
+[features]
+unstable=["unstable-to-pit"]
+unstable-to-pit=[]
