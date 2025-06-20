@@ -27,11 +27,12 @@ use nom::{
 };
 use pit_core::{Attr, parse_attr, parse_attrs, util::WriteUpdate};
 extern crate alloc;
+#[doc(hidden)]
+#[path = "./to_pit.rs"]
+pub mod _to_pit;
 // #[cfg(feature = "unstable-to-pit")]
 #[instability::unstable(feature = "to-pit")]
-pub mod to_pit {
-    include!("to_pit.rs");
-}
+pub use _to_pit as to_pit;
 
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Default)]
 pub struct Sdk {
