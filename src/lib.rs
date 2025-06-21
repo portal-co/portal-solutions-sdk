@@ -25,14 +25,17 @@ use nom::{
     multi::many0,
     sequence::{delimited, terminated},
 };
+pub use pit_core::Arity;
 use pit_core::{Attr, parse_attr, parse_attrs, util::WriteUpdate};
 extern crate alloc;
-#[doc(hidden)]
+// #[doc(hidden)]
 #[path = "./to_pit.rs"]
-pub mod _to_pit;
+mod _to_pit;
 // #[cfg(feature = "unstable-to-pit")]
 #[instability::unstable(feature = "to-pit")]
-pub use _to_pit as to_pit;
+pub mod to_pit {
+    pub use crate::_to_pit::*;
+}
 
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Default)]
 pub struct Sdk {
@@ -43,37 +46,7 @@ pub struct SdkItem {
     pub generics: Arity,
     pub contents: SdkItemContents,
 }
-#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Default)]
-pub struct Arity {
-    pub to_fill: BTreeMap<String, Arity>,
-}
-impl Display for Arity {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        write!(f, "<")?;
-        for (a, b) in &self.to_fill {
-            write!(f, "{a} {b}")?;
-        }
-        write!(f, ">")?;
-        Ok(())
-    }
-}
-impl Arity {
-    pub fn parse(a: &str) -> IResult<&str, Self> {
-        let (a, c) = space0
-            .and_then(delimited(
-                tag("<"),
-                many0(space0.and_then((alphanumeric1, space0.and_then(Arity::parse)))),
-                tag(">"),
-            ))
-            .parse(a)?;
-        return Ok((
-            a,
-            Arity {
-                to_fill: c.into_iter().map(|(a, b)| (a.to_owned(), b)).collect(),
-            },
-        ));
-    }
-}
+
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
 pub enum SdkItemContents {
     Type(SdkParam),
@@ -131,7 +104,7 @@ impl<T: Loader + ?Sized> Collector for T {}
 
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Default)]
 pub struct SdkInterface {
-    pub methods: BTreeMap<String, SdkMethod>,
+    pub methods: BTreeMap<String, (Arity, SdkMethod)>,
     pub attr: Vec<Attr>,
 }
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Default)]
@@ -270,7 +243,7 @@ impl SdkParam {
             }
             SdkTy::Interface { implementation } => {
                 for val in implementation.methods.values() {
-                    for item in val.args.values().chain(val.rets.values()) {
+                    for item in val.1.args.values().chain(val.1.rets.values()) {
                         item.refs(next)?;
                     }
                 }
@@ -517,7 +490,10 @@ impl SdkInterface {
         let (a, attr) = parse_attrs(a)?;
         let (a, _) = space0.and_then(tag("{")).parse(a)?;
         let (a, f) = space0
-            .and_then(many0((space0.and_then(alphanumeric0), SdkMethod::parse)))
+            .and_then(many0((
+                space0.and_then(alphanumeric0),
+                (Arity::parse, SdkMethod::parse),
+            )))
             .parse(a)?;
         let (a, _) = space0.and_then(tag("}")).parse(a)?;
         Ok((
@@ -535,8 +511,8 @@ impl Display for SdkInterface {
             write!(f, " {a} ")?;
         }
         write!(f, "{}", "{")?;
-        for (a, b) in self.methods.iter() {
-            write!(f, " {a} {b} ")?;
+        for (a, (b, c)) in self.methods.iter() {
+            write!(f, " {a} {b} {c} ")?;
         }
         write!(f, "{}", "}")?;
         Ok(())
