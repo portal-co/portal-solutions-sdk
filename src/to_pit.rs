@@ -41,5 +41,5 @@ pub trait ToPitTy {
         arity: &Arity,
         path: &(dyn Display + '_),
         // fmt: &mut Formatter,
-    ) -> Result<String, Error>;
+    ) -> Result<Vec<String>, Error>;
 }

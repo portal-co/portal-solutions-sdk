@@ -18,19 +18,25 @@ use nom::{
     IResult, Parser,
     bytes::complete::tag,
     character::{
-        complete::{alphanumeric0, space0},
-        streaming::alphanumeric1,
+        complete::{ space0},
+        // streaming::ident,
     },
     error::{ErrorKind, FromExternalError},
     multi::many0,
     sequence::{delimited, terminated},
 };
 pub use pit_core::Arity;
-use pit_core::{Attr, parse_attr, parse_attrs, util::WriteUpdate};
+use pit_core::{Attr, parse_attr, parse_attrs, util::WriteUpdate,ident};
 extern crate alloc;
 // #[doc(hidden)]
 #[path = "./to_pit.rs"]
 mod _to_pit;
+#[path = "./sdkcode.rs"]
+mod _sdkcode;
+#[instability::unstable(feature = "sdkcode")]
+pub mod sdkcode{
+    pub use crate::_sdkcode::*;
+}
 // #[cfg(feature = "unstable-to-pit")]
 #[instability::unstable(feature = "to-pit")]
 pub mod to_pit {
@@ -177,7 +183,7 @@ impl Sdk {
     pub fn parse(a: &str) -> IResult<&str, Self> {
         let (a, b) = many0((
             space0,
-            alphanumeric0,
+            ident,
             space0,
             (
                 Arity::parse,
@@ -284,7 +290,7 @@ impl SdkParam {
         if let Ok((a, x)) = delimited(
             tag("("),
             many0(terminated(
-                (alphanumeric1, space0, SdkParam::parse),
+                (ident, space0, SdkParam::parse),
                 (space0, tag(",")),
             )),
             tag(")"),
@@ -332,13 +338,13 @@ impl SdkParam {
 
         if let Some(a) = a.strip_prefix("$") {
             if let Ok((a, s)) = space0::<&str, nom::error::Error<&str>>
-                .and_then(alphanumeric0)
+                .and_then(ident)
                 .parse(a)
             {
                 if let Ok((a, args)) = delimited(
                     tag("<"),
                     many0(terminated(
-                        (space0.and_then(alphanumeric0), SdkParam::parse),
+                        (space0.and_then(ident), SdkParam::parse),
                         (space0, tag(",")),
                     )),
                     tag(">"),
@@ -363,7 +369,7 @@ impl SdkParam {
             if let Ok((a, args)) = delimited(
                 tag("<"),
                 many0(terminated(
-                    (space0.and_then(alphanumeric0), SdkParam::parse),
+                    (space0.and_then(ident), SdkParam::parse),
                     (space0, tag(",")),
                 )),
                 tag(">"),
@@ -384,11 +390,11 @@ impl SdkParam {
             };
         }
 
-        if let Ok((a, n)) = alphanumeric0::<&str, nom::error::Error<&str>>(a) {
+        if let Ok((a, n)) = ident(a) {
             if let Ok((a, args)) = delimited(
                 tag("<"),
                 many0(terminated(
-                    (space0.and_then(alphanumeric0), SdkParam::parse),
+                    (space0.and_then(ident), SdkParam::parse),
                     (space0, tag(",")),
                 )),
                 tag(">"),
@@ -491,7 +497,7 @@ impl SdkInterface {
         let (a, _) = space0.and_then(tag("{")).parse(a)?;
         let (a, f) = space0
             .and_then(many0((
-                space0.and_then(alphanumeric0),
+                space0.and_then(ident),
                 (Arity::parse, SdkMethod::parse),
             )))
             .parse(a)?;
@@ -525,7 +531,7 @@ impl SdkMethod {
         let (a, p) = delimited(
             tag("("),
             many0(terminated(
-                space0.and_then((alphanumeric0, SdkParam::parse)),
+                space0.and_then((ident, SdkParam::parse)),
                 space0.and_then(tag(",")),
             )),
             tag(")"),
@@ -537,7 +543,7 @@ impl SdkMethod {
         let (a, r) = delimited(
             tag("("),
             many0(terminated(
-                space0.and_then((alphanumeric0, SdkParam::parse)),
+                space0.and_then((ident, SdkParam::parse)),
                 space0.and_then(tag(",")),
             )),
             tag(")"),
