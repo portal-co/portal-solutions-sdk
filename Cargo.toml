@@ -1,6 +1,6 @@
 [package]
 name = "portal-solutions-sdk"
-version = "0.0.1"
+version = "0.0.2"
 edition = "2024"
 license = "MPL-2.0"
 description = "SDK description system for portal solutions"
