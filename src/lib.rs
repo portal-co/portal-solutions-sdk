@@ -115,6 +115,7 @@ pub struct SdkInterface {
 }
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Default)]
 pub struct SdkMethod {
+    pub arity: Arity,
     pub args: BTreeMap<String, SdkParam>,
     pub rets: BTreeMap<String, SdkParam>,
     pub attr: Vec<Attr>,
@@ -527,6 +528,7 @@ impl Display for SdkInterface {
 impl SdkMethod {
     pub fn parse(a: &str) -> IResult<&str, Self> {
         let (a, attr) = parse_attrs(a)?;
+        let (a,arity) = Arity::parse(a)?;
         let (a, _) = space0(a)?;
         let (a, p) = delimited(
             tag("("),
@@ -552,6 +554,7 @@ impl SdkMethod {
         Ok((
             a,
             Self {
+                arity,
                 args: p.into_iter().map(|(a, b)| (a.to_string(), b)).collect(),
                 rets: r.into_iter().map(|(a, b)| (a.to_string(), b)).collect(),
                 attr,
@@ -564,6 +567,7 @@ impl Display for SdkMethod {
         for a in self.attr.iter() {
             write!(f, " {a} ")?;
         }
+        write!(f,"{}",&self.arity)?;
         write!(f, "(")?;
         let mut a = true;
         for (name, val) in self.args.iter() {

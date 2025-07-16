@@ -15,5 +15,5 @@ sha3 = { version = "0.10.8", default-features = false }
 spin = "0.10.0"
 
 [features]
-unstable-to-pit=[]
+unstable-to-pit=["pit-core/unstable-generics"]
 unstable-sdkcode=["pit-core/unstable-pcode"]
