@@ -207,8 +207,7 @@ dependencies = [
 [[package]]
 name = "pit-core"
 version = "0.4.8"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8a20b52607b4081e44c0ba374498558801be92989162882854a44230a67d460b"
+source = "git+https://github.com/portal-co/pit-core.git#51d37562072efcd9e105fde51eab67d119dfdec9"
 dependencies = [
  "derive_more",
  "hex",
