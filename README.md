@@ -1,13 +1,14 @@
 # portal-solutions-sdk
 
 ## Description
-Project portal-solutions-sdk
+SDK description system for Portal Solutions. Defines SDK structures using `pit-core`.
 
 ## Goals
-- [ ] Add project goals
+- [ ] Define SDK metadata/structure
+- [ ] Integrate with PIT ecosystem
 
 ## Progress
-- [ ] Initial setup
+- [ ] Crate initialized
 
 ---
 *AI assisted*
