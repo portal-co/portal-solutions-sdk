@@ -21,7 +21,7 @@ fn dfn<T: FnMut(&mut Formatter) -> core::fmt::Result>(t: T) -> impl Display {
 }
 pub trait Store {
     type Error: Error;
-    fn store(&mut self, a: &Interface) -> Result<(), Self::Error>;
+    fn store(&mut self, path: &(dyn Display + '_), a: &Interface) -> Result<[u8; 32], Self::Error>;
 }
 pub trait ToPitTy {
     fn to_pit<Error: core::error::Error>(
